@@ -25,68 +25,24 @@ export type BuildingConfig = {
 
 // Building configuration
 export const buildingConfigs: Record<string, BuildingConfig> = {
-  AB: {
-    units: 44,
-    eligibleAreas: ["AB", "B3"] as ParkingArea[],
-    spotCount: {
-      AB: 42,
-      B3: 2,
-      B2: 0,
-      B1: 0,
-    },
-  },
   C: {
-    units: 83,
-    eligibleAreas: ["B3", "B2"] as ParkingArea[],
+    units: 22,
+    eligibleAreas: ["B3", "B2", "B1", "MISS"] as ParkingArea[],
   },
   D: {
-    units: 84,
-    eligibleAreas: ["B3", "B2"] as ParkingArea[],
+    units: 8,
+    eligibleAreas: ["B3", "B2", "B1", "MISS"] as ParkingArea[],
   },
   E: {
-    units: 89,
-    eligibleAreas: ["B3", "B2"] as ParkingArea[],
-  },
-  F: {
-    units: 96,
-    eligibleAreas: ["B3", "B2"] as ParkingArea[],
-  },
-  GH: {
-    units: 40,
-    eligibleAreas: ["B2"] as ParkingArea[],
-    spotCount: {
-      AB: 0,
-      B3: 0,
-      B2: 40,
-      B1: 0,
-    },
-  },
-  IJ: {
-    units: 40,
-    eligibleAreas: ["B1"] as ParkingArea[],
-    spotCount: {
-      AB: 0,
-      B3: 0,
-      B2: 0,
-      B1: 40,
-    },
+    units: 15,
+    eligibleAreas: ["B2", "B1", "MISS"] as ParkingArea[],
   },
 };
 
 // Types for the parking spot allocation system
 export type BuildingGroup = keyof typeof buildingConfigs;
-export type Building =
-  | "A"
-  | "B"
-  | "C"
-  | "D"
-  | "E"
-  | "F"
-  | "G"
-  | "H"
-  | "I"
-  | "J";
-export type ParkingArea = "AB" | "B3" | "B2" | "B1";
+export type Building = "C" | "D" | "E";
+export type ParkingArea = "B3" | "B2" | "B1" | "MISS";
 
 export interface Unit {
   id: string;

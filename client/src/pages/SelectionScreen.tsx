@@ -26,7 +26,7 @@ const SelectionScreen: React.FC = () => {
     <div className="min-h-screen bg-gray-100">
       <header className="bg-primary text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">機車停車位選號系統</h1>
+          <h1 className="text-2xl font-bold whitespace-nowrap">台北雪梨灣社區機車停車位選號系統</h1>
           <div className="flex items-center space-x-4">
             <Button
               onClick={() => setShowRemainingSpots(!showRemainingSpots)}
@@ -48,7 +48,7 @@ const SelectionScreen: React.FC = () => {
             {state.isCompleted && !state.isSecondRound && (
               <Button
                 onClick={startSecondRound}
-                className="bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
+                className="hidden bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
               >
                 第二輪抽籤
               </Button>

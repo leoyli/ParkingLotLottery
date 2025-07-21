@@ -1,70 +1,16 @@
 import {
-  User,
-  InsertUser,
-  ParkingState,
-  buildingConfigs,
+  Assignment,
   Building,
   BuildingConfig,
+  buildingConfigs,
+  InsertUser,
   ParkingArea,
-  Assignment,
+  ParkingState,
+  User,
 } from "@shared/schema";
-import originalUnits from "./units.json";
-import secondRoundData from "./second.json";
+import { RESERVED_SPOT_COUNT } from "./config-spots.ts";
+import { INITIAL_STATE } from "./config-initialState.ts";
 
-const RESERVED_SPOT_COUNT = {
-  AB: 0,
-  B3: 13,
-  B2: 18,
-  B1: 73,
-};
-
-const BICYCLE_SPOTS = [
-  "B3-82",
-  "B3-143-1",
-  "B2-159",
-  "B2-160",
-  "B2-161",
-  "B2-338",
-  "B2-339",
-  "B2-340",
-  "B2-408",
-  "B2-486",
-  "B2-487",
-  "B1-572",
-  "B1-573",
-];
-
-const FRIENDLY_SPOTS = [
-  "AB-25",
-  "B3-67",
-  "B3-68",
-  "B3-70",
-  "B3-81",
-  "B2-341",
-  "B2-372",
-  "B2-490",
-  "B2-491",
-  "B1-568",
-  "B1-569",
-  "B1-573-1",
-  "B1-575",
-];
-
-const RESTRICTED_UNITS: Record<string, ParkingArea> = {
-  "E8-1F": "B2",
-  "E7-1F": "B2",
-  "E6-1F": "B2",
-  "E5-1F": "B2",
-  "E9-2F": "B1",
-  "E8-2F": "B1",
-  "E7-2F": "B1",
-  "E6-2F": "B1",
-  "E5-2F": "B1",
-  "F5-1F": "B1",
-  "F7-1F": "B1",
-  "F8-1F": "B1",
-  "F9-1F": "B1",
-};
 
 export interface IStorage {
   // User operations (keeping these from the original storage interface)
@@ -96,47 +42,7 @@ export class MemStorage implements IStorage {
     this.currentId = 1;
 
     // Initialize parking state
-    this.parkingState = {
-      allSpots: {
-        AB: [],
-        B3: [],
-        B2: [],
-        B1: [],
-      },
-      availableSpots: {
-        AB: [],
-        B3: [],
-        B2: [],
-        B1: [],
-      },
-      reservedSpots: {},
-      unassignedUnits: {
-        A: [],
-        B: [],
-        C: [],
-        D: [],
-        E: [],
-        F: [],
-        G: [],
-        H: [],
-        I: [],
-        J: [],
-      },
-      bicycleSpots: BICYCLE_SPOTS,
-      friendlySpots: FRIENDLY_SPOTS,
-      restrictedUnits: RESTRICTED_UNITS,
-      assignments: [],
-      currentUnit: null,
-      currentSpot: null,
-      isStarted: false,
-      isPaused: false,
-      isCompleted: false,
-      // Second round properties
-      isSecondRound: false,
-      secondRoundUnits: secondRoundData as Record<string, ParkingArea[]>,
-      secondRoundAssignments: [],
-      isSecondRoundCompleted: false,
-    };
+    this.parkingState = JSON.parse(JSON.stringify(INITIAL_STATE));
   }
 
   // User methods (keeping these from the original storage interface)
@@ -164,10 +70,6 @@ export class MemStorage implements IStorage {
 
   async startSelection(): Promise<ParkingState> {
     // Initialize the state
-    this.initializeAvailableSpots();
-    this.initializeUnassignedUnits();
-    this.initializeReservedSpots();
-
     this.parkingState.isStarted = true;
     this.parkingState.isPaused = false;
     this.parkingState.isCompleted = false;
@@ -209,7 +111,7 @@ export class MemStorage implements IStorage {
     const assignedSpot = this.assignRandomSpot(building, unit);
 
     console.log(
-      `${unit} => ${assignedSpot} (${this.parkingState.availableSpots.AB.length} AB, ${this.parkingState.availableSpots.B3.length} B3, ${this.parkingState.availableSpots.B2.length} B2, ${this.parkingState.availableSpots.B1.length} B1)`
+      `${unit} => ${assignedSpot} (${this.parkingState.availableSpots.B3.length} B3, ${this.parkingState.availableSpots.B2.length} B2, ${this.parkingState.availableSpots.B1.length} B1, ${this.parkingState.availableSpots.MISS.length} MISS)`,
     );
 
     if (!assignedSpot) {
@@ -239,204 +141,7 @@ export class MemStorage implements IStorage {
   }
 
   async resetSelection(): Promise<void> {
-    this.parkingState = {
-      allSpots: {
-        AB: [],
-        B3: [],
-        B2: [],
-        B1: [],
-      },
-      availableSpots: {
-        AB: [],
-        B3: [],
-        B2: [],
-        B1: [],
-      },
-      reservedSpots: {},
-      unassignedUnits: {
-        A: [],
-        B: [],
-        C: [],
-        D: [],
-        E: [],
-        F: [],
-        G: [],
-        H: [],
-        I: [],
-        J: [],
-      },
-      bicycleSpots: BICYCLE_SPOTS,
-      friendlySpots: FRIENDLY_SPOTS,
-      restrictedUnits: RESTRICTED_UNITS,
-      assignments: [],
-      currentUnit: null,
-      currentSpot: null,
-      isStarted: false,
-      isPaused: false,
-      isCompleted: false,
-      // Second round properties
-      isSecondRound: false,
-      secondRoundUnits: secondRoundData as Record<string, ParkingArea[]>,
-      secondRoundAssignments: [],
-      isSecondRoundCompleted: false,
-    };
-
-    this.initializeAvailableSpots();
-    this.initializeUnassignedUnits();
-    this.initializeReservedSpots();
-  }
-
-  // 產生時如果有遇到數字尾是 4 的，則減1之後加上 -1 再繼續產生
-  private initializeAvailableSpots(): void {
-    // 生成 AB 區車位 (1-43，排除25號友善車位)
-    const abSpots = [];
-
-    for (let i = 1; i <= 43; i++) {
-      const spot = i % 10 === 4 ? `AB-${i - 1}-1` : `AB-${i}`; // 尾數是 4 的，減1後加上 -1
-
-      this.parkingState.allSpots.AB.push(spot);
-
-      if (FRIENDLY_SPOTS.includes(spot) || BICYCLE_SPOTS.includes(spot)) {
-        continue; // 排除友善車位和自行車車位
-      }
-
-      abSpots.push(spot);
-    }
-
-    // 生成 B3 區車位 (43-1到144號，排除 67, 68, 70, 81 號友善車位)
-    const b3Spots = [];
-
-    for (let i = 44; i <= 144; i++) {
-      const spot = i % 10 === 4 ? `B3-${i - 1}-1` : `B3-${i}`; // 尾數是 4 的，減1後加上 -1
-
-      this.parkingState.allSpots.B3.push(spot);
-
-      if (FRIENDLY_SPOTS.includes(spot) || BICYCLE_SPOTS.includes(spot)) {
-        continue; // 排除友善車位和自行車車位
-      }
-
-      b3Spots.push(spot);
-    }
-
-    // 生成 B2 區車位 (145-491號，排除 341, 372, 490, 491 號友善車位)
-    const b2Spots = [];
-
-    for (let i = 145; i <= 491; i++) {
-      const spot = i % 10 === 4 ? `B2-${i - 1}-1` : `B2-${i}`; // 尾數是 4 的，減1後加上 -1
-
-      this.parkingState.allSpots.B2.push(spot);
-
-      if (FRIENDLY_SPOTS.includes(spot) || BICYCLE_SPOTS.includes(spot)) {
-        continue; // 排除友善車位和自行車車位
-      }
-
-      b2Spots.push(spot);
-    }
-
-    // 生成 B1 區車位 (492-619號，排除 568, 569, 573-1, 575 號友善車位)
-    const b1Spots = [];
-
-    for (let i = 492; i <= 619; i++) {
-      const spot = i % 10 === 4 ? `B1-${i - 1}-1` : `B1-${i}`; // 尾數是 4 的，減1後加上 -1
-
-      this.parkingState.allSpots.B1.push(spot);
-
-      if (FRIENDLY_SPOTS.includes(spot) || BICYCLE_SPOTS.includes(spot)) {
-        continue; // 排除友善車位和自行車車位
-      }
-
-      b1Spots.push(spot);
-    }
-
-    this.parkingState.availableSpots = {
-      AB: abSpots,
-      B3: b3Spots,
-      B2: b2Spots,
-      B1: b1Spots,
-    };
-  }
-
-  private initializeUnassignedUnits(): void {
-    const unassignedUnits: Record<Building, string[]> = {
-      A: [],
-      B: [],
-      C: [],
-      D: [],
-      E: [],
-      F: [],
-      G: [],
-      H: [],
-      I: [],
-      J: [],
-    };
-
-    originalUnits.forEach((unit) => {
-      unassignedUnits[unit.building as Building].push(
-        `${unit.building}${unit.number}-${unit.floor}F`
-      );
-    });
-
-    this.parkingState.unassignedUnits = unassignedUnits;
-  }
-
-  // 初始化預留車位機制
-  private initializeReservedSpots(): void {
-    // 根據 buildingConfigs 中有 spotCount 的配置進行預留
-
-    // AB棟預留：AB區42個 + B3區2個
-    const abSpots = this.shuffleArray(
-      this.parkingState.availableSpots.AB
-    ).slice(0, 42);
-    const b3SpotsForAB = this.shuffleArray(
-      this.parkingState.availableSpots.B3
-    ).slice(0, 2);
-
-    this.parkingState.reservedSpots["AB_AB"] = abSpots;
-    this.parkingState.reservedSpots["AB_B3"] = b3SpotsForAB;
-
-    // 從 availableSpots 中移除已預留的車位
-    this.parkingState.availableSpots.AB =
-      this.parkingState.availableSpots.AB.filter(
-        (spot) => !abSpots.includes(spot)
-      );
-    this.parkingState.availableSpots.B3 =
-      this.parkingState.availableSpots.B3.filter(
-        (spot) => !b3SpotsForAB.includes(spot)
-      );
-
-    // GH棟預留：B2區40個
-    const b2SpotsForGH = this.shuffleArray(
-      this.parkingState.availableSpots.B2
-    ).slice(0, 40);
-    this.parkingState.reservedSpots["GH_B2"] = b2SpotsForGH;
-
-    // 從 availableSpots 中移除已預留的車位
-    this.parkingState.availableSpots.B2 =
-      this.parkingState.availableSpots.B2.filter(
-        (spot) => !b2SpotsForGH.includes(spot)
-      );
-
-    // IJ棟預留：B1區40個
-    const b1SpotsForIJ = this.shuffleArray(
-      this.parkingState.availableSpots.B1
-    ).slice(0, 40);
-    this.parkingState.reservedSpots["IJ_B1"] = b1SpotsForIJ;
-
-    // 從 availableSpots 中移除已預留的車位
-    this.parkingState.availableSpots.B1 =
-      this.parkingState.availableSpots.B1.filter(
-        (spot) => !b1SpotsForIJ.includes(spot)
-      );
-  }
-
-  private shuffleArray<T>(array: T[]): T[] {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-
-    return array;
+    this.parkingState = JSON.parse(JSON.stringify(INITIAL_STATE));
   }
 
   private getNextUnit(): { building: Building; unit: string } | null {
@@ -473,17 +178,7 @@ export class MemStorage implements IStorage {
   private getBuildingConfig(building: Building): BuildingConfig {
     // Map individual buildings to their building group
     let buildingGroup: keyof typeof buildingConfigs;
-
-    if (building === "A" || building === "B") {
-      buildingGroup = "AB";
-    } else if (building === "G" || building === "H") {
-      buildingGroup = "GH";
-    } else if (building === "I" || building === "J") {
-      buildingGroup = "IJ";
-    } else {
-      buildingGroup = building;
-    }
-
+    buildingGroup = building;
     return buildingConfigs[buildingGroup];
   }
 
@@ -550,15 +245,7 @@ export class MemStorage implements IStorage {
   }
 
   private getBuildingGroup(building: Building): string {
-    if (building === "A" || building === "B") {
-      return "AB";
-    } else if (building === "G" || building === "H") {
-      return "GH";
-    } else if (building === "I" || building === "J") {
-      return "IJ";
-    } else {
-      return building;
-    }
+    return building;
   }
 
   // Second round methods

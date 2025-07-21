@@ -49,18 +49,6 @@ const ResultsOverview: React.FC = () => {
             onClick={() => setFilteredBuilding("all")}
           />
           <BuildingFilter
-            building="A"
-            label="A棟"
-            active={filteredBuilding === "A"}
-            onClick={() => setFilteredBuilding("A")}
-          />
-          <BuildingFilter
-            building="B"
-            label="B棟"
-            active={filteredBuilding === "B"}
-            onClick={() => setFilteredBuilding("B")}
-          />
-          <BuildingFilter
             building="C"
             label="C棟"
             active={filteredBuilding === "C"}
@@ -78,43 +66,13 @@ const ResultsOverview: React.FC = () => {
             active={filteredBuilding === "E"}
             onClick={() => setFilteredBuilding("E")}
           />
-          <BuildingFilter
-            building="F"
-            label="F棟"
-            active={filteredBuilding === "F"}
-            onClick={() => setFilteredBuilding("F")}
-          />
-          <BuildingFilter
-            building="G"
-            label="G棟"
-            active={filteredBuilding === "G"}
-            onClick={() => setFilteredBuilding("G")}
-          />
-          <BuildingFilter
-            building="H"
-            label="H棟"
-            active={filteredBuilding === "H"}
-            onClick={() => setFilteredBuilding("H")}
-          />
-          <BuildingFilter
-            building="I"
-            label="I棟"
-            active={filteredBuilding === "I"}
-            onClick={() => setFilteredBuilding("I")}
-          />
-          <BuildingFilter
-            building="J"
-            label="J棟"
-            active={filteredBuilding === "J"}
-            onClick={() => setFilteredBuilding("J")}
-          />
         </div>
       </div>
 
       <div className="p-4">
         <div className="bg-gray-100 p-3 rounded-lg mb-4">
           <div className="flex justify-between mb-2">
-            <span className="text-gray-600">第一輪已分配:</span>
+            <span className="text-gray-600">已分配:</span>
             <span className="font-bold">{totalAssigned}</span>
           </div>
           {state.isSecondRound && (
@@ -145,7 +103,7 @@ const ResultsOverview: React.FC = () => {
           {filteredAssignments.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold text-gray-700 mb-3">
-                第一輪分配
+                已完成之分配
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {filteredAssignments.map((assignment, index) => (

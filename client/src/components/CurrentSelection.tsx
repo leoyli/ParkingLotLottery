@@ -66,9 +66,7 @@ const CurrentSelection: React.FC = () => {
   return (
     <div className="md:w-1/2 bg-white rounded-xl shadow-lg overflow-hidden">
       <div className="bg-primary text-white p-4">
-        <h2 className="text-xl font-bold">
-          {state.isSecondRound ? "第二輪選號" : "第一輪選號"}
-        </h2>
+        <h2 className="text-xl font-bold">當前選號</h2>
       </div>
 
       <div className="p-6 flex flex-col items-center justify-center min-h-[500px]">
