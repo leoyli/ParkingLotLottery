@@ -10,6 +10,7 @@ export const SWAPPING_UNITS = {
     "C3-2F (247-2F)",
     "C3-4F (247-4F)",
     "C3-9F (247-9F)",
+    "C4-6F (245-6F)",
     "C5-11F (243-11F)",
     "C5-3F (243-3F)",
     "C5-4F (243-4F)",
@@ -22,6 +23,7 @@ export const SWAPPING_UNITS = {
     "C7-2F (239-2F)",
     "C7-9F (239-9F)",
     "C8-4F (237-4F)",
+    "C8-5F (237-5F)"
   ],
   D: [
     "D1-1F (253-1F)",

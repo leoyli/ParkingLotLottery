@@ -60,4 +60,6 @@ export const AVAILABLE_SPOTS_MISS = [
   "沒中",
   "沒中",
   "沒中",
+  "沒中",
+  "沒中",
 ];
