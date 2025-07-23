@@ -26,7 +26,7 @@ export type BuildingConfig = {
 // Building configuration
 export const buildingConfigs: Record<string, BuildingConfig> = {
   C: {
-    units: 22,
+    units: 24,
     eligibleAreas: ["B3", "B2", "B1", "MISS"] as ParkingArea[],
   },
   D: {
